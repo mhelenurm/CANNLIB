@@ -1,8 +1,10 @@
 #ifndef MHLIB_ACTIVATION_H
 #define MHLIB_ACTIVATION_H
 
-typedef double (*activationFxn)(void*, double);
-typedef double (*activationDer)(void*, double);
+#include "types.h"
+
+typedef decimal (*activationFxn)(void*, decimal);
+typedef decimal (*activationDer)(void*, decimal);
 
 typedef struct
 {
@@ -11,32 +13,36 @@ typedef struct
   activationDer derivative;
 } activation;
 
-extern double activationEval(activation act, double input);
-extern double activationDerEval(activation act, double input);
+extern decimal activationEval(activation act, decimal input);
+extern decimal activationDerEval(activation act, decimal input);
 extern void activation_free(activation act);
 
-extern double activationSigmoidFunc(void* data, double input);
-extern double activationSigmoidDeri(void* data, double input);
-extern activation activation_make_sigmoid(double k);
+extern decimal activationSigmoidFunc(void* data, decimal input);
+extern decimal activationSigmoidDeri(void* data, decimal input);
+extern activation activation_make_sigmoid(decimal k);
 
-extern double activationTanhFunc(void* data, double input);
-extern double activationTanhDeri(void* data, double input);
+extern decimal activationTanhFunc(void* data, decimal input);
+extern decimal activationTanhDeri(void* data, decimal input);
 extern activation activation_make_tanh();
 
-extern double activationStepFunc(void* data, double input);
-extern double activationStepDeri(void* data, double input);
+extern decimal activationStepFunc(void* data, decimal input);
+extern decimal activationStepDeri(void* data, decimal input);
 extern activation activation_make_step();
 
-extern double activationLinearFunc(void* data, double input);
-extern double activationLinearDeri(void* data, double input);
-extern activation activation_make_linear(double a, double b);
+extern decimal activationLinearFunc(void* data, decimal input);
+extern decimal activationLinearDeri(void* data, decimal input);
+extern activation activation_make_linear(decimal a, decimal b);
 
-extern double activationRectifierFunc(void* data, double input);
-extern double activationRectifierDeri(void* data, double input);
+extern decimal activationRectifierFunc(void* data, decimal input);
+extern decimal activationRectifierDeri(void* data, decimal input);
 extern activation activation_make_rectifier();
 
-extern double activationSoftplusFunc(void* data, double input);
-extern double activationSoftplusDeri(void* data, double input);
+extern decimal activationSoftplusFunc(void* data, decimal input);
+extern decimal activationSoftplusDeri(void* data, decimal input);
 extern activation activation_make_softplus();
+
+extern decimal activationInverseAbsFunc(void* data, decimal input);
+extern decimal activationInverseAbsDeri(void* data, decimal input);
+extern activation activation_make_inverseAbs();
 
 #endif

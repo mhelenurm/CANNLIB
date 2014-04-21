@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "neuron.h"
 
-neuron neuron_make_input(activation* act, double input, unsigned int outputs)
+neuron neuron_make_input(activation* act, decimal input, unsigned int outputs)
 {
   return (neuron){true, activationEval(*act, input), act, 0, 0, 0, outputs, (neuron**)malloc(sizeof(neuron*)*outputs)};
 }
@@ -19,7 +19,7 @@ CHECK-Find slope of tangent, concavity, and arclength of a parametric equation
 neuron neuron_make(activation* act, unsigned int inputs, unsigned int outputs)
 {
   return (neuron){false, 0.0, act, inputs, (neuron**)malloc(sizeof(neuron*)*inputs),
-    (double*)malloc(sizeof(double)*inputs), outputs, (neuron**)malloc(sizeof(neuron*)*outputs)};
+    (decimal*)malloc(sizeof(decimal)*inputs), outputs, (neuron**)malloc(sizeof(neuron*)*outputs)};
 }
 
 void neuron_set_input_neuron(neuron* n, unsigned int index, neuron* add)
@@ -30,7 +30,7 @@ void neuron_set_input_neuron(neuron* n, unsigned int index, neuron* add)
   }
 }
 
-void neuron_set_input_neuron_weight(neuron* n, unsigned int index, double weight)
+void neuron_set_input_neuron_weight(neuron* n, unsigned int index, decimal weight)
 {
   if(index<n->inputs_count)
   {
@@ -46,7 +46,7 @@ void neuron_set_output_neuron(neuron* n, unsigned int index, neuron* add)
   }
 }
 
-void neuron_set_connection(neuron* a, unsigned int inda, neuron* b, unsigned int indb, double weight)
+void neuron_set_connection(neuron* a, unsigned int inda, neuron* b, unsigned int indb, decimal weight)
 {
   if(inda < a->outputs_count && indb < b->inputs_count)
   {
@@ -55,18 +55,18 @@ void neuron_set_connection(neuron* a, unsigned int inda, neuron* b, unsigned int
     b->inputweights[indb] = weight;
   }
 }
-void neuron_set_input(neuron* n, double value)
+void neuron_set_input(neuron* n, decimal value)
 {
   n->output_value = activationEval(*(n->act_func), value);
 }
 
-double neuron_output(neuron* n)
+decimal neuron_output(neuron* n)
 {
   if(n->is_input)
   {
     return n->output_value;
   }
-  double sum = 0.0;
+  decimal sum = 0.0;
   for(int i = 0; i < n->inputs_count; i++)
   {
     sum += neuron_output((n->inputs)[i]) * (n->inputweights)[i];

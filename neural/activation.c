@@ -2,12 +2,12 @@
 #include <math.h>
 #include <stdlib.h>
 
-double activationEval(activation act, double input)
+decimal activationEval(activation act, decimal input)
 {
   return act.function(act.data, input);
 }
 
-double activationDerEval(activation act, double input)
+decimal activationDerEval(activation act, decimal input)
 {
   return act.derivative(act.data, input);
 }
@@ -17,34 +17,54 @@ void activation_free(activation act)
   free(act.data);
 }
 
-double activationSigmoidFunc(void* data, double input)
+decimal activationSigmoidFunc(void* data, decimal input)
 {
-  return 1.0/(1.0 + exp(-((double*)data)[0]*input));
+#ifdef USE_DOUBLE
+  return 1.0/(1.0 + exp(-((decimal*)data)[0]*input));
+#endif
+#ifndef USE_DOUBLE
+  return 1.0/(1.0 + expf(-((decimal*)data)[0]*input));
+#endif
 }
 
-double activationSigmoidDeri(void* data, double input)
+decimal activationSigmoidDeri(void* data, decimal input)
 {
-  double func = 1.0/(1.0+exp(-((double*)data)[0]*input));
-  return ((double*)data)[0] * func * (1.0-func);
+#ifdef USE_DOUBLE
+  decimal func = 1.0/(1.0+exp(-((decimal*)data)[0]*input));
+#endif
+#ifndef USE_DOUBLE
+  decimal func = 1.0/(1.0+exp(-((decimal*)data)[0]*input));
+#endif
+  return ((decimal*)data)[0] * func * (1.0-func);
 }
 
-activation activation_make_sigmoid(double k)
+activation activation_make_sigmoid(decimal k)
 {
-  double* stuff = (double*)malloc(sizeof(double));
+  decimal* stuff = (decimal*)malloc(sizeof(decimal));
   stuff[0] = k;
   activation act = (activation){stuff, &activationSigmoidFunc, &activationSigmoidDeri};
   return act;
 }
 
-double activationTanhFunc(void* data, double input)
+decimal activationTanhFunc(void* data, decimal input)
 {
+#ifdef USE_DOUBLE
   return tanh(input);
+#endif
+#ifndef USE_DOUBLE
+  return tanhf(input);
+#endif
 }
 
-double activationTanhDeri(void* data, double input)
+decimal activationTanhDeri(void* data, decimal input)
 {
-  double tanhr = tanh(input);
-  return 1.0-tanhr*tanhr;
+#ifdef USE_DOUBLE
+  decimal tanhr = tanh(input);
+#endif
+#ifndef USE_DOUBLE
+  decimal tanhr = tanhf(input);
+#endif
+  return (1.0-tanhr*tanhr);
 }
 
 activation activation_make_tanh()
@@ -53,12 +73,12 @@ activation activation_make_tanh()
   return act;
 }
 
-double activationStepFunc(void* data, double input)
+decimal activationStepFunc(void* data, decimal input)
 {
   return (input<0)?0:1;
 }
 
-double activationStepDeri(void* data, double input)
+decimal activationStepDeri(void* data, decimal input)
 {
   return 0;
 }
@@ -68,30 +88,30 @@ activation activation_make_step()
   return (activation){0, &activationStepFunc, &activationStepDeri};
 }
 
-double activationLinearFunc(void* data, double input)
+decimal activationLinearFunc(void* data, decimal input)
 {
-  return ((double*)data)[0] * input + ((double*)data)[1];
+  return ((decimal*)data)[0] * input + ((decimal*)data)[1];
 }
 
-double activationLinearDeri(void* data, double input)
+decimal activationLinearDeri(void* data, decimal input)
 {
-  return ((double*)data)[0];
+  return ((decimal*)data)[0];
 }
 
-activation activation_make_linear(double a, double b)
+activation activation_make_linear(decimal a, decimal b)
 {
-  double* stuff = (double*)malloc(sizeof(double)*2);
+  decimal* stuff = (decimal*)malloc(sizeof(decimal)*2);
   stuff[0] = a;
   stuff[1] = b;
   return (activation){stuff, &activationLinearFunc, &activationLinearDeri};
 }
 
-double activationRectifierFunc(void* data, double input)
+decimal activationRectifierFunc(void* data, decimal input)
 {
   return (input<0)?0:input;
 }
 
-double activationRectifierDeri(void* data, double input)
+decimal activationRectifierDeri(void* data, decimal input)
 {
   return (input<0)?0:1;
 }
@@ -101,17 +121,50 @@ activation activation_make_rectifier()
   return (activation){0, &activationRectifierFunc, &activationRectifierDeri};
 }
 
-double activationSoftplusFunc(void* data, double input)
+decimal activationSoftplusFunc(void* data, decimal input)
 {
+#ifdef USE_DOUBLE
   return log(1.0 + exp(input));
+#endif
+#ifndef USE_DOUBLE
+  return logf(1.0+expf(input));
+#endif
 }
 
-double activationSoftplusDeri(void* data, double input)
+decimal activationSoftplusDeri(void* data, decimal input)
 {
+#ifdef USE_DOUBLE
   return 1.0/(1.0 + exp(-input));
+#endif
+#ifndef USE_DOUBLE
+  return 1.0/(1.0+exp(-input));
+#endif
 }
 
 activation activation_make_softplus()
 {
   return (activation){0, &activationSoftplusFunc, &activationSoftplusDeri};
+}
+
+decimal activationInverseAbsFunc(void* data, decimal input)
+{
+#ifdef USE_DOUBLE
+  return input/(1+fabs(input));
+#endif
+#ifndef USE_DOUBLE
+  return input/(1+fabsf(input));
+#endif
+}
+
+decimal activationInverseAbsDeri(void* data, decimal input)
+{
+  if(input<0)
+    input*=-1;
+  decimal p1 = input+1;
+  return 1.0/p1 - input/(p1*p1);
+}
+
+activation activation_make_inverseAbs()
+{
+  return (activation){0, &activationInverseAbsFunc, &activationInverseAbsDeri};
 }
