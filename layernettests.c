@@ -21,8 +21,9 @@
 #define IMAGE_HEIGHT 200
 
 //NEURAL VARIABLES 'N SHIT
-#define TRAINING_ITERATIONS 1000000
-#define LEARNING_RATE 0.01
+#define TRAINING_ITERATIONS 10000000
+#define LEARNING_RATE 0.001
+#define HARSH_TRAINING 1
 
 int main()
 {
@@ -114,6 +115,23 @@ int main()
     inputs[1] = y;
     expoutputs[0] = (x*x+y*y<=1.0)?max:min;
     layered_network_train(&nn, inputs, expoutputs, LEARNING_RATE);
+    if(HARSH_TRAINING)
+    {
+      while(1)
+      {
+        layered_network_set_input(&nn, inputs);
+        layered_network_get_output(&nn, outputs);
+        decimal out = outputs[0];
+        //if out correct, break, else train
+        if((out>=middle && expoutputs[0] == min) || (out<=middle && expoutputs[0] == max))
+        {
+          layered_network_train(&nn, inputs, expoutputs, LEARNING_RATE);
+        } else
+        {
+          break;
+        }
+      }
+    }
   }
   if(PRINT_SHIT)
     printf("Final Percentage Test: \n");
