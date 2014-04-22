@@ -7,6 +7,46 @@ decimal activationEval(activation act, decimal input)
   return act.function(act.data, input);
 }
 
+decimal activationFuncMax(activation act)
+{
+  if(act.function == &activationSigmoidFunc)
+    return 1.0;
+  else if(act.function == &activationTanhFunc)
+    return 1.0;
+  else if(act.function == &activationStepFunc)
+    return 1.0;
+  else if(act.function == &activationLinearFunc)
+    return sqrt(-1);
+  else if(act.function == &activationRectifierFunc)
+    return sqrt(-1);
+  else if(act.function == &activationSoftplusFunc)
+    return sqrt(-1);
+  else if(act.function == &activationInverseAbsFunc)
+    return 1.0;
+  else
+    return sqrt(-1);
+}
+
+decimal activationFuncMin(activation act)
+{
+  if(act.function == &activationSigmoidFunc)
+    return 0.0;
+  else if(act.function == &activationTanhFunc)
+    return 0.0;
+  else if(act.function == &activationStepFunc) 
+    return 0.0;
+  else if(act.function == &activationLinearFunc)
+    return sqrt(-1);
+  else if(act.function == &activationRectifierFunc)
+    return 0.0;
+  else if(act.function == &activationSoftplusFunc)
+    return 0.0;
+  else if(act.function == &activationInverseAbsFunc)
+    return -1.0;
+  else
+    return sqrt(-1);
+} 
+
 decimal activationDerEval(activation act, decimal input)
 {
   return act.derivative(act.data, input);
@@ -49,7 +89,7 @@ activation activation_make_sigmoid(decimal k)
 decimal activationTanhFunc(void* data, decimal input)
 {
 #ifdef USE_DOUBLE
-  return tanh(input);
+  return (tanh(input)+1.0)/2.0;
 #endif
 #ifndef USE_DOUBLE
   return tanhf(input);
@@ -64,7 +104,7 @@ decimal activationTanhDeri(void* data, decimal input)
 #ifndef USE_DOUBLE
   decimal tanhr = tanhf(input);
 #endif
-  return (1.0-tanhr*tanhr);
+  return .5*(1.0-tanhr*tanhr);
 }
 
 activation activation_make_tanh()

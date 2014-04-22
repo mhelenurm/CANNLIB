@@ -2,11 +2,12 @@
 #define MHLIB_NEURON_H
 #include <stdbool.h>
 #include "activation.h"
-#include "types.h"
+#include "neural_types.h"
 
 typedef struct neuron
 {
   bool is_input; //whether this node's output is set by hand
+  decimal pre_output; //the output before the function
   decimal output_value; //if is_input, set this to the input
   activation* act_func; //activation function (pointer so reuse is avail.)
 

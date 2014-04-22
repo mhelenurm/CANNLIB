@@ -1,7 +1,7 @@
 #ifndef MHLIB_ACTIVATION_H
 #define MHLIB_ACTIVATION_H
 
-#include "types.h"
+#include "neural_types.h"
 
 typedef decimal (*activationFxn)(void*, decimal);
 typedef decimal (*activationDer)(void*, decimal);
@@ -14,6 +14,8 @@ typedef struct
 } activation;
 
 extern decimal activationEval(activation act, decimal input);
+extern decimal activationFuncMax(activation act);
+extern decimal activationFuncMin(activation act);
 extern decimal activationDerEval(activation act, decimal input);
 extern void activation_free(activation act);
 

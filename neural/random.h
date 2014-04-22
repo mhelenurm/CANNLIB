@@ -1,7 +1,7 @@
 #ifndef MHLIB_RANDOM_H
 #define MHLIB_RANDOM_H
 
-#include "types.h"
+#include "neural_types.h"
 
 #define RANDOM_48BIT_MASK 0xFFFFFFFFFFFFL
 #define RANDOM_24BIT_DIVIDE 0x1000000

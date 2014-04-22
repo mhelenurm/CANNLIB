@@ -12,7 +12,7 @@ layered_network_sig layered_network_sig_make(unsigned int layers, unsigned int* 
 {
   srand(time(NULL));
   activation* act = (activation*)malloc(sizeof(activation));
-  act[0] = activation_make_sigmoid(1.0);
+  act[0] = activation_make_tanh();
 
   neuron collection = neuron_make(act, nodes_per_layer[layers-1], 0);
   layered_network_sig nn = (layered_network_sig){layers, 0, 0, collection, act};
@@ -27,6 +27,7 @@ layered_network_sig layered_network_sig_make(unsigned int layers, unsigned int* 
 
   unsigned int index = 0;
   unsigned int lastlayerstart = 0;
+
   for(int i = 0; i < layers; i++)
   {
     for(int j = 0; j < npl[i]; j++)
@@ -40,7 +41,7 @@ layered_network_sig layered_network_sig_make(unsigned int layers, unsigned int* 
         for(int k = lastlayerstart; k < lastlayerstart+npl[i-1]; k++)
         {
           //printf(".\n");
-          neuron_set_connection(&(nodes[k]), j, &(nodes[index]), k-lastlayerstart, rand_decimal()*.05);
+          neuron_set_connection(&(nodes[k]), j, &(nodes[index]), k-lastlayerstart, rand_decimal()*2.0);
         }
         if(i==layers-1)
         {
@@ -96,7 +97,7 @@ void layered_network_sig_train(layered_network_sig* n, decimal* input, decimal* 
   }
   neuron_output(&(n->collection));
   unsigned int totalnodesdelta = sum + n->nodes_per_layer[n->layers-1] - n->nodes_per_layer[0];
-  decimal* littledelta = (decimal*)malloc(sizeof(decimal)*totalnodesdelta);
+  decimal littledelta[totalnodesdelta];
   for(int i = 0; i < totalnodesdelta; i++)
   {
     littledelta[i] = 0;
@@ -110,9 +111,9 @@ void layered_network_sig_train(layered_network_sig* n, decimal* input, decimal* 
     {
       for(int j = 0; j <n->nodes_per_layer[i]; j++)
       {
-        //printf("a: %d\n", (curlayerindex+j+n->nodes_per_layer[0]));
         decimal d = (n->nodes[curlayerindex+j+n->nodes_per_layer[0]]).output_value;
-        littledelta[j+curlayerindex] = d * (1-d) * (target[j] - d);
+        decimal preout = (n->nodes[curlayerindex+j+n->nodes_per_layer[0]]).pre_output;
+        littledelta[j+curlayerindex] = activationDerEval(*(n->nodes[curlayerindex+j+n->nodes_per_layer[0]]).act_func, preout) * (target[j] - d);
       }
     }
     for(int j = 0; j < n->nodes_per_layer[i]; j++)
@@ -120,8 +121,8 @@ void layered_network_sig_train(layered_network_sig* n, decimal* input, decimal* 
       //we need to: finish calculating this layer; update input weights, update next layer
       if(i != n->layers-1)
       {
-         decimal n_out = (n->nodes[curlayerindex+j+n->nodes_per_layer[0]]).output_value;
-         littledelta[j+curlayerindex] *= n_out * (1-n_out);
+         decimal pre_out = (n->nodes[curlayerindex+j+n->nodes_per_layer[0]]).pre_output;
+         littledelta[j+curlayerindex] *= activationDerEval(*(n->nodes[curlayerindex+j+n->nodes_per_layer[0]]).act_func, pre_out);
       }
       //update upstream weights
       neuron* c_neu = &(n->nodes[curlayerindex+j+n->nodes_per_layer[0]]);
@@ -139,9 +140,7 @@ void layered_network_sig_train(layered_network_sig* n, decimal* input, decimal* 
       }
     }
   }
-   
 }
-
 
 void layered_network_sig_free(layered_network_sig n)
 {

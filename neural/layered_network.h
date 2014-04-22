@@ -2,7 +2,7 @@
 #define MHLIB_LAYERED_NETWORK_H
 #include "neuron.h"
 #include "activation.h"
-#include "types.h"
+#include "neural_types.h"
 
 typedef struct layered_network_sig
 {
