@@ -1,21 +1,16 @@
 #include "layered_network.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include "random.h"
 
-decimal rand_decimal()
+layered_network layered_network_make(unsigned int layers, unsigned int* nodes_per_layer, activation h)
 {
-  return 2.0*((decimal)rand()/(decimal)RAND_MAX - 0.5);
-}
-
-layered_network_sig layered_network_sig_make(unsigned int layers, unsigned int* nodes_per_layer)
-{
-  srand(time(NULL));
+  unsigned long random_int = random_make_time();
   activation* act = (activation*)malloc(sizeof(activation));
-  act[0] = activation_make_tanh();
+  act[0] = h;
 
   neuron collection = neuron_make(act, nodes_per_layer[layers-1], 0);
-  layered_network_sig nn = (layered_network_sig){layers, 0, 0, collection, act};
+  layered_network nn = (layered_network){layers, 0, 0, collection, act};
   unsigned int* npl = (unsigned int*)malloc(sizeof(unsigned int)*layers);
   int sum = 0;
   for(int i = 0; i < layers; i++)
@@ -40,12 +35,10 @@ layered_network_sig layered_network_sig_make(unsigned int layers, unsigned int* 
         nodes[index] = neuron_make(nn.act, npl[i-1], (i==layers-1)?1:npl[i+1]);
         for(int k = lastlayerstart; k < lastlayerstart+npl[i-1]; k++)
         {
-          //printf(".\n");
-          neuron_set_connection(&(nodes[k]), j, &(nodes[index]), k-lastlayerstart, rand_decimal()*2.0);
+          neuron_set_connection(&(nodes[k]), j, &(nodes[index]), k-lastlayerstart, 2.0*(random_next_float(&random_int)-0.5));
         }
         if(i==layers-1)
         {
-          //printf("* %d\n", (sum-1-index));
           neuron_set_connection(&(nodes[index]), 0, &collection, sum-1-index, 1.0);
         }
       }
@@ -61,7 +54,7 @@ layered_network_sig layered_network_sig_make(unsigned int layers, unsigned int* 
   return nn;
 }
 
-void layered_network_sig_set_input(layered_network_sig* n, decimal* inputvals) //of size npl[0]
+void layered_network_set_input(layered_network* n, decimal* inputvals) //of size npl[0]
 {
   for(int i = 0; i < n->nodes_per_layer[0]; i++)
   {
@@ -69,7 +62,7 @@ void layered_network_sig_set_input(layered_network_sig* n, decimal* inputvals) /
   }
 }
 
-void layered_network_sig_get_output(layered_network_sig* n, decimal* outputvals) //of size npl[layers-1]
+void layered_network_get_output(layered_network* n, decimal* outputvals) //of size npl[layers-1]
 {
   int sum = 0;
   for(int i = 0; i < n->layers-1; i++)
@@ -83,7 +76,7 @@ void layered_network_sig_get_output(layered_network_sig* n, decimal* outputvals)
   }
 }
 
-void layered_network_sig_train(layered_network_sig* n, decimal* input, decimal* target, decimal learnrate)
+void layered_network_train(layered_network* n, decimal* input, decimal* target, decimal learnrate)
 {
   
   for(int i = 0; i < n->nodes_per_layer[0]; i++)
@@ -142,7 +135,7 @@ void layered_network_sig_train(layered_network_sig* n, decimal* input, decimal* 
   }
 }
 
-void layered_network_sig_free(layered_network_sig n)
+void layered_network_free(layered_network n)
 {
   free(n.nodes);
   free(n.nodes_per_layer);
